@@ -42,9 +42,12 @@ chdir $ENV{HOME} if (!(-r '.'));
 my $daemon_mode;
 my $daemon_sleep = 5;
 my $directory;
+my $tempdir ;
 my $nosanitize;
 my $skip_export;
 my $keep_export;
+
+
 my $skip_index;
 my $reset;
 my $biblios;
@@ -71,6 +74,7 @@ my $result = GetOptions(
     'daemon'        => \$daemon_mode,
     'sleep:i'       => \$daemon_sleep,
     'd:s'           => \$directory,
+    'td|tempdir:s'  => \$tempdir,
     'r|reset'       => \$reset,
     's'             => \$skip_export,
     'k'             => \$keep_export,
@@ -161,7 +165,13 @@ if ($verbose_logging >= 2) {
 my $use_tempdir = 0;
 unless ($directory) {
     $use_tempdir = 1;
-    $directory = tempdir(CLEANUP => ($keep_export ? 0 : 1));
+    $directory   = tempdir(
+        CLEANUP => ( $keep_export ? 0        : 1 ),
+        DIR     => ( $tempdir     ? $tempdir : undef ),
+    );
+}
+else {
+    $directory = "$tempdir/$directory" if $tempdir;
 }
 
 
@@ -270,24 +280,26 @@ if ( $verbose_logging ) {
     print "CLEANING\n";
     print "====================\n";
 }
+
 if ($keep_export) {
-    print "NOTHING cleaned : the export $directory has been kept.\n";
+    print "NOTHING cleaned : the export directory $directory has been kept.\n";
     print "You can re-run this script with the -s ";
     if ($use_tempdir) {
         print " and -d $directory parameters";
-    } else {
-        print "parameter";
+    }
+    else {
+        print " parameter";
     }
     print "\n";
     print "if you just want to rebuild zebra after changing zebra config files\n";
 } else {
     unless ($use_tempdir) {
-        # if we're using a temporary directory
-        # created by File::Temp, it will be removed
-        # automatically.
-        rmtree($directory, 0, 1);
-        print "directory $directory deleted\n";
+
+        # else, we remove it manually
+        rmtree( $directory, 0, 1 );
     }
+    print "the export directory $directory has been deleted.\n"
+      if $verbose_logging;
 }
 
 sub do_one_pass {
@@ -871,6 +883,11 @@ Parameters:
 
     -r                      clear Zebra index before
                             adding records to index. Implies -w.
+
+    --tempdir               Add a base directory for indexing.
+                            Note: Using this arg in conjuction with the -d arg, will create
+                            a directory under the path given with --tempdir
+                            so, --tempdir /tmp_zeb -d foo1, creates an absolute path of /tmp_zeb/foo1
 
     -d                      Temporary directory for indexing.
                             If not specified, one is automatically
