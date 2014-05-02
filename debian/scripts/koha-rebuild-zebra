@@ -64,10 +64,11 @@ run_rebuild_zebra()
 
         # TODO: This comment is here to remind us that we should make
         # rebuild_zebra.pl return error codes on failure
+
         if sudo -u "$instancename-koha" -H \
             env PERL5LIB=$PERL5LIB \
             KOHA_CONF="/etc/koha/sites/$instancename/koha-conf.xml" \
-            $KOHA_BINDIR/migration_tools/rebuild_zebra.pl $@ ; then
+            $KOHA_BINDIR/migration_tools/rebuild_zebra.pl --tempdir /var/tmp $@ ; then
             return 0
         else
             return 1
