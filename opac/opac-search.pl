@@ -65,6 +65,10 @@ use URI::Escape;
 use JSON qw/decode_json encode_json/;
 use Business::ISBN;
 
+use CGI::Cookie;
+#use DDP alias => 'zzz', colored => 0, caller_info => 1;
+#use Smart::Comments;
+
 my $DisplayMultiPlaceHold = C4::Context->preference("DisplayMultiPlaceHold");
 # create a new CGI object
 # FIXME: no_undef_params needs to be tested
@@ -96,12 +100,15 @@ BEGIN {
     }
 }
 
+        import C4::Category qw(&AuthorizedValuesForCategory );
+
 my ($template,$borrowernumber,$cookie);
 # decide which template to use
 my $template_name;
 my $template_type = 'basic';
 my @params = $cgi->multi_param("limit");
 my @searchCategories = $cgi->multi_param('searchcat');
+# -----------------------------------------------------------
 
 my $format = $cgi->param("format") || '';
 my $build_grouped_results = C4::Context->preference('OPACGroupResults');
@@ -136,6 +143,57 @@ my $lang = C4::Languages::getlanguage($cgi);
 if ($template_name eq 'opac-results.tt') {
    $template->param('COinSinOPACResults' => C4::Context->preference('COinSinOPACResults'));
 }
+
+
+#------------------------------------------------------------
+# -----------------------------------------------------------
+
+my $cc;
+
+if ( C4::Context->preference('CCodePulldown') ) {
+
+    # my $ccode_limit =  $template->{VARS}->{ccode_limit};
+    my $ccode_limit;
+    my $ccodes = $template->{VARS}->{ccodes};
+
+    #test for ccode
+
+    foreach my $c (@params) {
+        if ( $c =~ /mc-ccode/ ) {
+            $c =~ s/^.*://;
+            $ccode_limit = $c;
+            last;
+        }
+    }
+
+    # set cookie
+    $ccode_limit = '-' unless $ccode_limit;
+### $ccode_limit
+
+    $cc = CGI::Cookie->new(
+        -name    => 'ccode',
+        -value   => $ccode_limit,
+        -expires => '+3M',
+    );
+
+    foreach my $c (@$ccodes) {
+        delete $c->{selected};
+    }
+
+    # set selected
+    foreach my $c (@$ccodes) {
+        if ( $c->{authorised_value} eq $ccode_limit ) {
+            $c->{selected} = 1;
+            last;
+        }
+    }
+
+    $template->param( ccodes => $ccodes );
+
+}
+
+#------------------------------------------------------------
+#------------------------------------------------------------
 
 # get biblionumbers stored in the cart
 my @cart_list;
@@ -1017,4 +1075,5 @@ if ($offset == 0) {
 }
 
     $template->param( borrowernumber    => $borrowernumber);
-output_with_http_headers $cgi, $cookie, $template->output, $content_type;
+
+output_with_http_headers $cgi, [$cookie, $cc] , $template->output, $content_type;

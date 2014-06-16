@@ -26,6 +26,8 @@ use CGI::Session;
 
 require Exporter;
 use C4::Context;
+use C4::Category;
+
 use C4::Templates;    # to get the template
 use C4::Languages;
 use C4::Search::History;
@@ -42,6 +44,8 @@ use POSIX qw/strftime/;
 use List::MoreUtils qw/ any /;
 use Encode qw( encode is_utf8);
 use C4::Auth_with_shibboleth;
+
+#use Smart::Comments;
 
 # use utf8;
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $debug $ldap $cas $caslogout);
@@ -615,6 +619,32 @@ sub get_template_and_user {
 
         $template->param( OpacPublic => '1' ) if ( $user || C4::Context->preference("OpacPublic") );
     }
+
+# ------------------------------------------
+# ------------------------------------------
+
+if ( C4::Context->preference("CCodePulldown") ) {
+
+    my %cookies = CGI::Cookie->fetch;
+    my $ccode_limit;
+
+    eval { $ccode_limit = $cookies{'ccode'}->value; };
+
+    $template->param( CcodeDrop => '1' );
+    my $ccodes = C4::Category::AuthorizedValuesForCategory('CCODE');
+
+    if ($ccode_limit) {
+        foreach my $c (@$ccodes) {
+            $c->{selected} = 1 if $c->{authorised_value} eq $ccode_limit;
+        }
+    }
+
+    $template->param( ccodes => $ccodes );
+
+}
+
+# ------------------------------------------
+# ------------------------------------------
 
     # Check if we were asked using parameters to force a specific language
     if ( defined $in->{'query'}->param('language') ) {

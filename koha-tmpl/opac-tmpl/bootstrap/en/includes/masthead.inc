@@ -199,6 +199,23 @@
                                 [% END # /IF OPACNumbersPreferPhrase %]
                                 </select>
 
+
+                         [% IF ( Koha.Preference( 'CCodePulldown' ) == 1 ) %]
+                            <select name="limit" id="masthead_search3">
+                                <option value="">All collections</option>
+
+                                      [% FOREACH c IN ccodes  %]
+                                         <option value="mc-ccode:[% c.authorised_value %]"
+                                            [% IF ( c.selected ) %]
+                                                selected="selected" 
+                                            [% END %]
+                                        >[% c.lib_opac %]</option>
+                                      [% END %]
+
+                            </select>
+                         [% END %]
+
+
                                 [% UNLESS ( Koha.Preference( 'OpacAddMastheadLibraryPulldown' ) == 1 ) %]
                                     <div class="input-append nolibrarypulldown">
                                 [% END %]
