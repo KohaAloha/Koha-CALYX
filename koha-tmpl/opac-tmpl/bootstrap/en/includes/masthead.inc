@@ -21,7 +21,7 @@
                     [% END %]
                     <ul class="nav">
                         [% IF ( Koha.Preference( 'opacbookbag' ) == 1 ) %]
-                            <li>
+                            <li id="cartdrop" class="dropdown">
                                 <a href="#" title="Collect items you are interested in" id="cartmenulink" role="button">
                                     <i id="carticon" class="fa fa-shopping-cart fa-icon-white"></i> <span class="cartlabel">Cart</span> <span id="basketcount"></span>
                                 </a>
