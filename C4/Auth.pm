@@ -906,7 +906,7 @@ sub checkauth {
             -expires  => '',
             -HttpOnly => 1,
         );
-        $loggedin = 1;
+        $loggedin = check_user_exists($userid);
     }
     elsif ( $emailaddress) {
         # the Google OpenID Connect passes an email address
@@ -1993,6 +1993,28 @@ sub checkpw_hash {
         $hash = md5_base64($password);
     }
     return $hash eq $stored_hash;
+}
+
+=head2 check_user_exists
+
+    my $exists = check_user_exists($userid);
+
+This does a very simple check to see if a user could log in with the provided
+userid. That is, does the userid exist as a person's userid or cardnumber
+in the database. Returns a true value if it does, false otherwise.
+
+This is to allow koha to ensure that third party auth systems give us a real
+user ID for a user, not just assuming they're real.
+
+=cut
+
+sub check_user_exists {
+    my ($userid) = @_;
+
+    my $dbh = C4::Context->dbh();
+    my $sth = $dbh->prepare('SELECT userid FROM borrowers WHERE userid=? OR cardnumber=? LIMIT 1');
+    $sth->execute($userid, $userid);
+    return !!$sth->fetchrow_arrayref(); # coerce to boolean
 }
 
 =head2 getuserflags
