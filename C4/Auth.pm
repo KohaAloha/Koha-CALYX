@@ -906,6 +906,10 @@ sub checkauth {
             -expires  => '',
             -HttpOnly => 1,
         );
+
+        # Unset the userenv as we don't have a sessionID anyway, and it risks
+        # getting the environment for another user, which is quite bad.
+        C4::Context::_new_userenv(undef);
         $loggedin = check_user_exists($userid);
     }
     elsif ( $emailaddress) {
