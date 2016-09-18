@@ -95,3 +95,118 @@ if ($action eq 'export' && $input->request_method() eq 'GET') {
         print $input->redirect( -location => '/cgi-bin/koha/admin/biblio_framework.pl?error_import_export=' . $frameworkcode);
     }
 }
+
+=c
+sub takes and returns a $scalar holding the file contents
+
+openoffice will import a 'happy' csv file, and save it as a csv file that Koha will no longer import :/
+this sub() reformats an OO 'bad' csv file, and reformats it so Koha will import it successfully
+
+so, bad csv like this...
+------------------------
+"tagfield","liblibrarian","libopac","repeatable","mandatory","authorised_value","frameworkcode",,,,,,,,,,,
+"000","ZZZ","LEADER",0,1,,,,,,,,,,,,,
+"001","CONTROL NUMBER","CONTROL NUMBER",0,0,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+"#-#","#-#","#-#","#-#","#-#","#-#","#-#",,,,,,,,,,,
+,,,,,,,,,,,,,,,,,
+"tagfield","tagsubfield","liblibrarian","libopac","repeatable","mandatory","kohafield","tab","authorised_value","authtypecode","value_builder","isurl","hidden","frameworkcode","seealso","link","defaultvalue","maxlength"
+"000","@","fixed length control field","fixed length control field",0,1,,0,,,"marc21_leader.pl",0,0,,,,,24
+"001","@","control field","control field",0,0,,0,,,,0,0,,,,,9999
+,,,,,,,,,,,,,,,,,
+"#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#"
+------------------------
+
+
+is corrected to this...
+------------------------
+"tagfield","liblibrarian","libopac","repeatable","mandatory","authorised_value","frameworkcode"
+"000","ZZZ","LEADER","0","1","","CF"
+"001","CONTROL NUMBER","CONTROL NUMBER","0","0","","CF"
+
+"#-#","#-#","#-#","#-#","#-#","#-#","#-#"
+
+"tagfield","tagsubfield","liblibrarian","libopac","repeatable","mandatory","kohafield","tab","authorised_value","authtypecode","value_builder","isurl","hidden","frameworkcode","seealso","link","defaultvalue","maxlength"
+"000","@","fixed length control field","fixed length control field","0","1","","0","","","marc21_leader.pl","0","0","CF","","","","24"
+"001","@","control field","control field","0","0","","0","","","","0","0","CF","","","","9999"
+
+"#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#","#-#"
+
+------------------------
+
+note the lazy quoting and trailing ',,,,,' commas, in the 1st example
+these both cause Koha's importation process to fail :/
+
+=cut
+
+
+sub _fix_openoffice_csv {
+
+    my $data = shift;
+
+    # replace glitchy WIN/DOS line endings
+    $data =~ s/\r\n/\n/g;
+
+    my @lines1;
+    my @lines2;
+
+    my $tagstring;
+    $tagstring = 0;
+    #process 1st block to csv
+    foreach my $l1 ( split /\n/, $data ) {
+        $tagstring++ if $l1 =~ m/tagfield/;
+        last if $tagstring == 2;
+
+        #    $line = '\n' if $line =~ m/,,,,,,,,,,,,,,,,,//;
+
+        $l1 =~ s/,,,,,,,,,,,$//;    # strip
+        $l1 =~ s/^,,,,,,$//;        # strip
+        push @lines1, $l1;
+
+    }
+
+    # each csv block is a diff. lenght and format, so we need 2 block to handle this...
+    # process 2nd block to csv
+    $tagstring = 0;
+    foreach my $l2 ( split /\n/, $data ) {
+
+        $tagstring++ if $l2 =~ m/tagfield/;
+        next unless $tagstring == 2;
+
+        $l2 =~ s/,,,,,,,,,,,,,,,,,$//;
+        push @lines2, $l2;
+
+    }
+
+    my $data2;
+    foreach my $line ( @lines1, @lines2 ) {
+        $line =~ s/,,,$//;
+
+        #    warn $line;
+
+        my $csv  = Text::CSV->new( { always_quote => 1 } );
+        my $csv2 = Text::CSV->new( { always_quote => 1 } );
+
+        #$line2   = $csv->string();             # get the combined string
+
+        $csv->parse($line);    # parse a CSV string into fields
+        my @columns = $csv->fields();    # get the parsed fields
+
+        #  zzz @columns;
+
+        $csv2->combine(@columns);
+        my $line2;
+        $line2 = $csv2->string();
+
+        $line2 =~ s/^""$//;              # clean blank lines
+
+        $data2 .= "$line2\n";
+
+    }
+
+    $data2 .= "\n";
+
+    #zzz $data2;
+    return $data2;
+}
+
