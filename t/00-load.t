@@ -43,6 +43,7 @@ find({
         $m =~ s{/}{::}g;
         return if $m =~ /Auth_with_ldap/; # Dont test this, it will fail on use
         return if $m =~ /SIPServer/; # SIP Server module has old package usage
+        return if $m =~ /C4::Carousel/; # needs context
         use_ok($m) || BAIL_OUT("***** PROBLEMS LOADING FILE '$m'");
     },
 }, $lib);

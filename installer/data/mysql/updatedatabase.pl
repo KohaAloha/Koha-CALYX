@@ -8523,11 +8523,21 @@ if ( CheckVersion($DBversion) ) {
     SetVersion($DBversion);
 }
 
-$DBversion = "3.15.00.052";
+
+$DBversion = "3.15.00.053";
 if ( CheckVersion($DBversion) ) {
-    print "Upgrade to $DBversion done (Koha 3.16 RC)\n";
+    $dbh->do("
+CREATE TABLE IF NOT EXISTS `isbn_image_url` (
+  `isbn` varchar(14) NOT NULL,
+  `url` varchar(255) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`isbn`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+    ");
+    print "Upgrade to $DBversion done (add caro table)\n";
     SetVersion($DBversion);
 }
+
 
 $DBversion = "3.16.00.000";
 if ( CheckVersion($DBversion) ) {

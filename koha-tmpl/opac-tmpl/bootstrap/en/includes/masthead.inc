@@ -1,7 +1,11 @@
 [% USE raw %]
 [% USE Koha %]
 [% USE Branches %]
+
 [% SET OpacLangSelectorMode = Koha.Preference('OpacLangSelectorMode') %]
+<script type="text/javascript" src="[% interface %]/[% theme %]/lib/jquery/jquery.js"></script>
+
+
 <div id="wrap">
     <div id="header-region" class="noprint">
         <div class="navbar navbar-inverse navbar-static-top">
@@ -121,6 +125,7 @@
             </div> <!-- /navbar-inner -->
         </div> <!-- /navbar -->
 
+        <div id="opacheader-wrap">
         [% IF ( opacheader ) %]
             <div class="container-fluid">
                 <div class="row-fluid">
@@ -130,6 +135,9 @@
                 </div>
             </div>
         [% END %]
+        </div>
+
+
     </div> <!-- / header-region -->
 
     <div class="container-fluid">

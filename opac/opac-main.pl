@@ -22,13 +22,21 @@ use Modern::Perl;
 use CGI qw ( -utf8 );
 use C4::Auth;    # get_template_and_user
 use C4::Output;
-use C4::NewsChannels;    # GetNewsToDisplay
+use C4::NewsChannels;    # get_opac_news
+use C4::Acquisition;     # GetRecentAcqui
+use C4::Carousel;
 use C4::Languages qw(getTranslatedLanguages accept_language);
 use C4::Koha qw( GetDailyQuote );
 use C4::Members;
 use C4::Overdues;
 use Koha::Checkouts;
 use Koha::Holds;
+
+#use Devel::NYTProf;
+use Time::HiRes  qw/gettimeofday tv_interval/;
+
+#use Data::Printer;
+
 
 my $input = new CGI;
 my $dbh   = C4::Context->dbh;
@@ -41,6 +49,18 @@ my ( $template, $borrowernumber, $cookie ) = get_template_and_user(
         authnotrequired => ( C4::Context->preference("OpacPublic") ? 1 : 0 ),
     }
 );
+
+
+
+my $user_branch ;
+
+#$user_branch  = C4::Context->userenv->{'branch'} if C4::Context->userenv->{'branch'};
+
+#my $a = p $template->VARS ;
+#p $a;
+
+#my $vars =  $template->vars;
+#p $vars;
 
 my $casAuthentication = C4::Context->preference('casAuthentication');
 $template->param(
@@ -88,6 +108,12 @@ if ( $patron ) {
         );
     }
 }
+# -------------------------------------------
+if (C4::Context->preference('OpacCarousel') ) {
+    our $new_bibs_loop   = GetNewBiblios($user_branch );
+    $template->param(   new_bibs_loop => $new_bibs_loop ) ;
+}
+# -------------------------------------------
 
 $template->param(
     koha_news           => $all_koha_news,

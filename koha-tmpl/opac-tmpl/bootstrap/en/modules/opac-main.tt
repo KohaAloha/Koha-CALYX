@@ -6,6 +6,19 @@
 <title>[% IF ( LibraryNameTitle ) %][% LibraryNameTitle | html %][% ELSE %]Koha online[% END %] catalog</title>
 [% INCLUDE 'doc-head-close.inc' %]
 [% BLOCK cssinclude %][% END %]
+
+[% IF ( new_bibs_loop  ) %]
+<script type="text/javascript" src="[% interface %]/[% theme %]/lib/contentflow/contentf
+low.js" load="white"></script>
+    <script style="text/javascript">
+        var cf1 = new ContentFlow('cf1', {
+            reflectionHeight : 0.1 ,
+            reflectionGap : 0,
+            scaleFactor : 1.7,
+     });
+</script>
+[% END %]
+
 </head>
 [% INCLUDE 'bodytag.inc' bodyid='opac-main' %]
 [% INCLUDE 'masthead.inc' %]
@@ -107,6 +120,43 @@
         [% END %]
 
         [% IF ( OpacMainUserBlock ) %]<div id="opacmainuserblock">[% OpacMainUserBlock | $raw %]</div>[% END %]
+
+<!-- --------------------------------- -->
+[% IF ( new_bibs_loop  ) %]
+<!-- ------------- -->
+
+<div id="cc1" class="row-fluid">
+        <div class="span3"></div>
+        <div id="cc2" class="span6">
+
+<div id="cc3" class="">
+<center><h3 id="cf-title" >Recently added items</h3></center>
+
+<div id="cf1" class="ContentFlow">
+<div class="flow">
+<!-- -- -->
+[% FOREACH new_bibs IN new_bibs_loop %]
+        <div class="item" href="/cgi-bin/koha/opac-detail.pl?bib=[% new_bibs.biblionumber %]" >
+                <img class="content" src="[% new_bibs.image_url %]" />
+                <div class="caption">[% new_bibs.title %][% IF ( new_bibs.author  ) %] by [% new_bibs.author %][% END %]</div>
+            </div>
+[% END %]
+<!-- -- -->
+ </div>
+        <div class="globalCaption"></div>
+           <div class="scrollbar"><div class="slider"><div class="position"></div>
+
+</div>
+</div>
+
+        </div>
+        </div>
+</div>
+
+<!-- ------------- -->
+[% END %]
+<!-- --------------------------------- -->
+
         </div> <!-- / .span 7/9 -->
 
         [% IF ( ( Koha.Preference( 'opacuserlogin' ) == 1 ) || OpacNavRight ) %]
@@ -118,7 +168,7 @@
                                 <form action="/cgi-bin/koha/opac-user.pl" method="post" name="auth" id="auth" autocomplete="off">
                                     <input type="hidden" name="koha_login_context" value="opac" />
                                     <fieldset class="brief">
-                                        <legend>Log in to your account:</legend>
+                                        <legend>Log in to your account xxx:</legend>
                                         <label for="userid">Login:</label><input type="text" id="userid" name="userid" />
                                         <label for="password">Password:</label><input type="password" id="password" name="password" />
                                         <fieldset class="action">
