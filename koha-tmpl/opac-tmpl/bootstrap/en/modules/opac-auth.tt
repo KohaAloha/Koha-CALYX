@@ -155,7 +155,12 @@
                         [% ELSIF SCI_login %]
                             <form action="/cgi-bin/koha/sci/sci-main.pl" name="auth" id="auth" method="post" autocomplete="off">
                         [% ELSE %]
-                            <form action="[% script_name | html %]" name="auth" id="auth" method="post" autocomplete="off">
+                            <!-- fix broken local auth -->
+                            [% IF ( invalidGoogleOpenIDConnectLogin ) %]
+                                <form action="/cgi-bin/koha/opac-user.pl" name="auth" id="auth" method="post">
+                            [% ELSE %]
+                                <form action="[% script_name | html %]" name="auth" id="auth" method="post" autocomplete="off">
+                            [% END %]
                         [% END %]
                             <input type="hidden" name="koha_login_context" value="opac" />
                             <fieldset class="brief">
