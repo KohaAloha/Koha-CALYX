@@ -33,8 +33,8 @@ var dataTablesDefaults = {
     },
     "dom": '<"top pager"ilpfB>tr<"bottom pager"ip>',
     "buttons": [],
-    "aLengthMenu": [[10, 20, 50, 100, -1], [10, 20, 50, 100, window.MSG_DT_ALL || "All"]],
-    "iDisplayLength": 20
+    "aLengthMenu": [[10, 20, 50, 100, 300, -1], [10, 20, 50, 100, 300, window.MSG_DT_ALL || "All"]],
+    "iDisplayLength": 100
 };
 
 
