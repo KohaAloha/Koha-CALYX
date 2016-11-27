@@ -327,15 +327,20 @@ sub buildKohaItemsNamespace {
         my $homebranch = $item->{homebranch}? xml_escape($branches{$item->{homebranch}}):'';
         my $holdingbranch = $item->{holdingbranch}? xml_escape($branches{$item->{holdingbranch}}):'';
         $location = $item->{location}? xml_escape($shelflocations->{$item->{location}}||$item->{location}):'';
+
         $ccode = $item->{ccode}? xml_escape($ccodes->{$item->{ccode}}||$item->{ccode}):'';
+
         my $itemcallnumber = xml_escape($item->{itemcallnumber});
         my $stocknumber = $item->{stocknumber}? xml_escape($item->{stocknumber}):'';
+        my $enumchron = xml_escape($item->{enumchron});
+
         $xml .=
             "<item>"
           . "<homebranch>$homebranch</homebranch>"
           . "<holdingbranch>$holdingbranch</holdingbranch>"
           . "<location>$location</location>"
           . "<ccode>$ccode</ccode>"
+          . "<enumchron>$enumchron</enumchron>"
           . "<status>".( $status // q{} )."</status>"
           . "<itemcallnumber>$itemcallnumber</itemcallnumber>"
           . "<stocknumber>$stocknumber</stocknumber>"
