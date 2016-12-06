@@ -240,14 +240,14 @@
                         [% ELSE %]
 
                             <form action="/cgi-bin/koha/opac-basket.pl" method="get" name="bookbag_form" id="bookbag_form" class="checkboxed">
-                                <table id="itemst" class="table table-bordered table-striped">
+                                <table id="itemst" class="table basket table-bordered table-striped">
                                     <thead>
                                         <tr>
                                             <th class="noprint">&nbsp;</th>
                                             <th>Title</th>
                                             <th>Author</th>
-                                            <th>Year</th>
-                                            <th>Location (Status)</th>
+                                            <th class="year">Year</th>
+                                            <th class="loc">Location (Status)</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -265,14 +265,14 @@
                                                 [% END %]
                                             </td>
                                             <td>[% BIBLIO_RESULT.author | html %]</td>
-                                            <td>
+                                            <td class="year">
                                                 [% IF ( BIBLIO_RESULT.publicationyear ) %]
                                                     [% BIBLIO_RESULT.publicationyear | html %]
                                                 [% ELSE %]
                                                     [% BIBLIO_RESULT.copyrightdate | html %]
                                                 [% END %]
                                             </td>
-                                            <td>[% IF ( BIBLIO_RESULT.ITEM_RESULTS ) %]<ul>[% FOREACH ITEM_RESULT IN BIBLIO_RESULT.ITEM_RESULTS %]
+                                            <td class="loc">[% IF ( BIBLIO_RESULT.ITEM_RESULTS ) %]<ul>[% FOREACH ITEM_RESULT IN BIBLIO_RESULT.ITEM_RESULTS %]
                                                 <li>
                                                     [% ITEM_RESULT.branchname | html %]
                                                     [% IF ( ITEM_RESULT.location_opac ) %]<span class="shelvingloc">[% ITEM_RESULT.location_opac | html %]</span>[% END %]
@@ -280,6 +280,9 @@
                                                         ([% ITEM_RESULT.itemcallnumber | html %])
                                                     [% END %]
                                                     ([% INCLUDE 'item-status.inc' item = ITEM_RESULT %])
+                                                                [% IF ( ITEM_RESULT.enumchron ) %]
+                                                                   <span id="enum">([% ITEM_RESULT.enumchron %])</span>
+                                                                [% END %]
                                                 </li>
                                                 [% END %]</ul>[% ELSE %]This record has no items.[% END %]
                                             </td>
