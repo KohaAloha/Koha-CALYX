@@ -258,6 +258,7 @@
                 <xsl:when test="$ind2='0'">
                     <span class="label">Producer: </span>
                 </xsl:when>
+
                 <xsl:when test="$ind2='1'">
                     <span class="label">Publisher: </span>
                 </xsl:when>
@@ -267,9 +268,14 @@
                 <xsl:when test="$ind2='3'">
                     <span class="label">Manufacturer: </span>
                 </xsl:when>
+
                 <xsl:when test="$ind2='4'">
                     <span class="label">Copyright date: </span>
                 </xsl:when>
+
+                <xsl:otherwise>
+                    <span class="label">Publisher: </span>
+                </xsl:otherwise>
             </xsl:choose>
 
             <xsl:if test="$field/marc:subfield[@code='a']">
@@ -277,6 +283,7 @@
                     <xsl:with-param name="codes">a</xsl:with-param>
                 </xsl:call-template>
             </xsl:if>
+
             <xsl:text> </xsl:text>
 
             <xsl:choose>
