@@ -28,7 +28,7 @@ use POSIX qw/strftime/;
 
 my $basetgz;
 my $buildresult;
-my $distribution='squeeze-dev';
+my $distribution='stable';
 my $git_checks='all';
 my $version='16.06~git';
 my $auto_version=1;
