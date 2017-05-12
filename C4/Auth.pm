@@ -26,7 +26,7 @@ use CGI::Session;
 
 require Exporter;
 use C4::Context;
-use C4::Category;
+#use C4::Category;
 
 use C4::Templates;    # to get the template
 use C4::Languages;
@@ -45,7 +45,10 @@ use List::MoreUtils qw/ any /;
 use Encode qw( encode is_utf8);
 use C4::Auth_with_shibboleth;
 
-#use Smart::Comments;
+#use Smart::Comments '#####';
+
+use DDP alias => 'zzz', colored => 0, caller_info => 1;
+
 
 # use utf8;
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $debug $ldap $cas $caslogout);
@@ -550,6 +553,8 @@ sub get_template_and_user {
         }
 
         my @search_groups = Koha::Library::Groups->get_search_groups({ interface => 'opac' });
+        my $library_categories = Koha::LibraryCategories->search({categorytype => 'searchdomain', show_in_pulldown => 1}, { order_by => ['categorytype', 'categorycode']});
+
         $template->param(
             AnonSuggestions                       => "" . C4::Context->preference("AnonSuggestions"),
             LibrarySearchGroups                   => \@search_groups,
@@ -623,15 +628,17 @@ sub get_template_and_user {
 # ------------------------------------------
 # ------------------------------------------
 
-if ( C4::Context->preference("CCodePulldown") ) {
+#if ( C4::Context->preference("CCodePulldown") ) {
+if ( 1 ) {
 
     my %cookies = CGI::Cookie->fetch;
     my $ccode_limit;
 
     eval { $ccode_limit = $cookies{'ccode'}->value; };
-
     $template->param( CcodeDrop => '1' );
-    my $ccodes = C4::Category::AuthorizedValuesForCategory('CCODE');
+
+#    my $ccodes = C4::Category::AuthorizedValuesForCategory('CCODE');
+    my $ccodes = C4::Koha::GetAuthorisedValues('CCODE');
 
     if ($ccode_limit) {
         foreach my $c (@$ccodes) {
@@ -639,8 +646,8 @@ if ( C4::Context->preference("CCodePulldown") ) {
         }
     }
 
+zzz  $ccodes ;
     $template->param( ccodes => $ccodes );
-
 }
 
 # ------------------------------------------
