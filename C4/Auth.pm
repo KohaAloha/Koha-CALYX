@@ -47,7 +47,7 @@ use C4::Auth_with_shibboleth;
 
 #use Smart::Comments '#####';
 
-use DDP alias => 'zzz', colored => 0, caller_info => 1;
+#use DDP alias => 'zzz', colored => 0, caller_info => 1;
 
 
 # use utf8;
@@ -646,7 +646,7 @@ if ( 1 ) {
         }
     }
 
-zzz  $ccodes ;
+#zzz  $ccodes ;
     $template->param( ccodes => $ccodes );
 }
 
