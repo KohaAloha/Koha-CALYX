@@ -100,8 +100,6 @@ BEGIN {
     }
 }
 
-        import C4::Category qw(&AuthorizedValuesForCategory );
-
 my ($template,$borrowernumber,$cookie);
 # decide which template to use
 my $template_name;
