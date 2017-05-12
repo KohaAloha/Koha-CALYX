@@ -1018,6 +1018,20 @@ sub GetVariationsOfISSNs {
     return wantarray ? @issns : join( " | ", @issns );
 }
 
+sub SetCCodeCookie {
+      my ( $query, $set_ccode, $uri ) = @_;
+      my $cookie = $query->cookie(
+          -name    => 'KohaOpacCCode',
+          -value   => $set_ccode,
+          -HttpOnly => 1,
+          -expires => '+3y'
+      );
+      print $query->redirect(
+          -uri    => $uri,
+          -cookie => $cookie
+      );
+  }
+
 1;
 
 __END__
