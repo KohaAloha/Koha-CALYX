@@ -96,7 +96,7 @@ my $borcat = $borr ? $borr->{categorycode} : q{};
 my (  $today_year,   $today_month,   $today_day) = Today();
 my ($warning_year, $warning_month, $warning_day) = split /-/, $borr->{'dateexpiry'};
 
-my $debar = Koha::Patrons->find( $borrowernumber )->is_debarred;
+my $debar = Koha::Patrons->find( $borrowernumber )->is_debarred if $borrowernumber;
 my $userdebarred;
 
 if ($debar) {
