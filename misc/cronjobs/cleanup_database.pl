@@ -82,6 +82,8 @@ Usage: $0 [-h|--help] [--sessions] [--sessdays DAYS] [-v|--verbose] [--zebraqueu
    --temp-uploads-days DAYS Override the corresponding preference value.
    --uploads-missing FLAG Delete upload records for missing files when FLAG is true, count them otherwise
    --oauth-tokens     Delete expired OAuth2 tokens
+   --list-corrupted-data List the corrupted data. A data is considered corrupted if the move of a row from one table to another can lead to data loss (See https://wiki.koha-community.org/wiki/DBMS_auto_increment_fix for more informations)
+   --fix-corrupted-data Fix the corrupted data by assigning a new id to the rows
 USAGE
     exit $_[0];
 }
@@ -108,6 +110,7 @@ my $temp_uploads;
 my $temp_uploads_days;
 my $uploads_missing;
 my $oauth_tokens;
+my ( $list_corrupted_data, $fix_corrupted_data );
 
 GetOptions(
     'h|help'            => \$help,
@@ -132,6 +135,8 @@ GetOptions(
     'temp-uploads-days:i' => \$temp_uploads_days,
     'uploads-missing:i' => \$uploads_missing,
     'oauth-tokens'      => \$oauth_tokens,
+    'list-corrupted-data' => \$list_corrupted_data,
+    'fix-corrupted-data'  => \$fix_corrupted_data,
 ) || usage(1);
 
 # Use default values
@@ -166,6 +171,8 @@ unless ( $sessions
     || $temp_uploads
     || defined $uploads_missing
     || $oauth_tokens
+    || $list_corrupted_data
+    || $fix_corrupted_data
 ) {
     print "You did not specify any cleanup work for the script to do.\n\n";
     usage(1);
@@ -344,6 +351,38 @@ if ($oauth_tokens) {
     say "Removed $count expired OAuth2 tokens" if $verbose;
 }
 
+if ( $list_corrupted_data or $fix_corrupted_data ) {
+    print "Looking for corrupted data\n" if $verbose;
+
+    my $RaiseError = $dbh->{RaiseError};
+    $dbh->{RaiseError} = 1;
+    my $data = GetCorruptedData();
+    if (@$data) {
+        print "Problems found!\n" if $verbose;
+        TABLES: for my $data (@$data) {
+            my $col_name      = $data->{col_name};
+            my $table         = $data->{tables}[0];
+            my $deleted_table = $data->{tables}[1];
+            print "\n * Tables $table/$deleted_table: ";
+            print join( ', ', map { $_->{$col_name} } @{ $data->{rows} } ) . "\n";
+            if ($fix_corrupted_data) {
+                FixCorruptedData(
+                    {
+                        table         => $table,
+                        deleted_table => $deleted_table,
+                        col_name      => $col_name,
+                        rows          => $data->{rows}
+                    }
+                );
+            }
+        }
+    }
+    else {
+        print "Everything is clean!\n";
+    }
+    $dbh->{RaiseError} = $RaiseError;
+}
+
 exit(0);
 
 sub RemoveOldSessions {
@@ -451,4 +490,94 @@ sub DeleteSpecialHolidays {
     });
     my $count = $sth->execute( $days ) + 0;
     print "Removed $count unique holidays\n" if $verbose;
+}
+
+sub FixCorruptedData {
+    my ($params)      = @_;
+    my $table         = $params->{table};
+    my $deleted_table = $params->{deleted_table};
+    my $col_name      = $params->{col_name};
+    my $rows = $params->{rows} || [];
+    my $schema = Koha::Database->new->schema;
+    $schema->storage->txn_begin;
+    my $query_max = qq|
+        SELECT GREATEST(
+            COALESCE( ( SELECT MAX($col_name) FROM $table         ), 0 ),
+            COALESCE( ( SELECT MAX($col_name) FROM $deleted_table ), 0 )
+        ) + 1 AS max;
+    |;
+    my ($max)     = $dbh->selectrow_array($query_max);
+    my $query_fix = qq|UPDATE $table SET $col_name = ? WHERE $col_name = ?|;
+    my $sth_fix   = $dbh->prepare($query_fix);
+    my $everything_went_fine = 1;
+    ROWS: for my $row ( @{$rows} ) {
+        my $old_id = $row->{$col_name};
+        print "Updating $table.$col_name=$old_id with new id $max\n";
+        eval {
+            $sth_fix->execute( $max, $old_id );
+        };
+        if ($@) {
+            print "Something went wrong, rolling back!\n";
+            $schema->storage->txn_rollback;
+            $everything_went_fine = 0;
+            last ROWS;
+        }
+        $max++;
+    }
+    $schema->storage->txn_commit if $everything_went_fine;
+}
+
+sub GetCorruptedData {
+    my $dbh     = C4::Context->dbh;
+    my $patrons = $dbh->selectall_arrayref(
+        q|SELECT b.borrowernumber FROM borrowers b JOIN deletedborrowers db ON b.borrowernumber=db.borrowernumber|,
+        { Slice => {} }
+    );
+    my $biblios = $dbh->selectall_arrayref(
+        q|SELECT b.biblionumber FROM biblio b JOIN deletedbiblio db ON b.biblionumber=db.biblionumber|,
+        { Slice => {} }
+    );
+    my $items = $dbh->selectall_arrayref(
+        q|SELECT i.itemnumber FROM items i JOIN deleteditems di ON i.itemnumber=di.itemnumber|,
+        { Slice => {} }
+    );
+    my $checkouts = $dbh->selectall_arrayref(
+        q|SELECT i.issue_id FROM issues i JOIN old_issues oi ON i.issue_id=oi.issue_id|,
+        { Slice => {} }
+    );
+    my $holds = $dbh->selectall_arrayref(
+        q|SELECT r.reserve_id FROM reserves r JOIN old_reserves o ON r.reserve_id=o.reserve_id|,
+        { Slice => {} }
+    );
+    return [
+        (
+            @$patrons
+            ? {
+                entity => 'patrons',
+                col_name => 'borrowernumber',
+                rows => $patrons,
+                tables  => [ 'borrowers', 'deletedborrowers' ],
+              }
+            : ()
+        ),
+        (
+            @$biblios
+            ? { entity => 'biblios', col_name => 'borrowernumber', rows => $biblios, tables => [ 'biblio', 'deletedbiblio' ] }
+            : ()
+        ),
+        (
+            @$items ? { entity => 'items', col_name => 'itemnumber', rows => $items, tables => [ 'items', 'deleteditems' ] }
+            : ()
+        ),
+        (
+            @$checkouts
+            ? { entity => 'checkouts', col_name => 'issue_id', rows => $checkouts, tables => [ 'issues', 'old_issues' ] }
+            : ()
+        ),
+        (
+            @$holds
+            ? { entity => 'holds', col_name => 'reserve_id', rows => $holds, tables => [ 'reserves', 'old_reserves' ] }
+            : ()
+        ),
+    ];
 }
