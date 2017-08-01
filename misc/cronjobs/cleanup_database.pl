@@ -515,6 +515,38 @@ sub FixCorruptedData {
         print "Updating $table.$col_name=$old_id with new id $max\n";
         eval {
             $sth_fix->execute( $max, $old_id );
+            if ( $table eq 'issues' ) {
+                $dbh->do( q|UPDATE accountlines SET issue_id = ? WHERE issue_id = ?|, undef, $max, $old_id );
+            } elsif ( $table eq 'borrowers' ) {
+                $dbh->do( q|UPDATE borrower_password_recovery SET borrowernumber = ? WHERE borrowernumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE borrowers SET guarantorid = ? WHERE guarantorid= ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE notifys SET borrowernumber = ? WHERE borrowernumber = ?|, undef, $max, $old_id ); # Just in case, see bug 10021
+                $dbh->do( q|UPDATE saved_sql SET borrowernumber = ? WHERE borrowernumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE search_history SET userid = ? WHERE userid = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE statistics SET borrowernumber = ? WHERE borrowernumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE aqbudgets SET budget_owner_id = ? WHERE budget_owner_id = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE aqbasket SET authorisedby = ? WHERE authorisedby = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE suggestions SET suggestedby = ? WHERE suggestedby = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE suggestions SET managedby = ? WHERE managedby = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE suggestions SET acceptedby = ? WHERE acceptedby = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE suggestions SET rejectedby = ? WHERE rejectedby = ?|, undef, $max, $old_id );
+            } elsif ( $table eq 'biblio' ) {
+                $dbh->do( q|UPDATE import_biblios SET matched_biblionumber = ? WHERE matched_biblionumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE oai_sets_biblios SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE serial SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE subscription SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE subscriptionhistory SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE tmp_holdsqueue SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE suggestions SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE linktracker SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
+            } elsif ( $table eq 'items' ) {
+                $dbh->do( q|UPDATE collections_tracking SET itemnumber = ? WHERE itemnumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE import_items SET itemnumber = ? WHERE itemnumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE notifys SET itemnumber = ? WHERE itemnumber = ?|, undef, $max, $old_id ); # Just in case, see bug 10021
+                $dbh->do( q|UPDATE statistics SET itemnumber = ? WHERE itemnumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE tmp_holdsqueue SET itemnumber = ? WHERE itemnumber = ?|, undef, $max, $old_id );
+                $dbh->do( q|UPDATE accountlines SET itemnumber = ? WHERE itemnumber = ?|, undef, $max, $old_id );
+            }
         };
         if ($@) {
             print "Something went wrong, rolling back!\n";
