@@ -594,7 +594,7 @@ sub GetCorruptedData {
         ),
         (
             @$biblios
-            ? { entity => 'biblios', col_name => 'borrowernumber', rows => $biblios, tables => [ 'biblio', 'deletedbiblio' ] }
+            ? { entity => 'biblios', col_name => 'biblionumber', rows => $biblios, tables => [ 'biblio', 'deletedbiblio' ] }
             : ()
         ),
         (
