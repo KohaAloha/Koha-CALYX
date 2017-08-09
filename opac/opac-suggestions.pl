@@ -114,6 +114,8 @@ if ( $op eq 'else' ) {
     }
 }
 
+my ( $borr ) = GetMemberDetails( $borrowernumber ) if  $borrowernumber;
+
 my $patrons_pending_suggestions_count = 0;
 if ( $borrowernumber && C4::Context->preference("MaxOpenSuggestions") ne '' ) {
     $patrons_pending_suggestions_count = scalar @{ SearchSuggestion( { suggestedby => $borrowernumber, STATUS => 'ASKED' } ) } ;
@@ -147,7 +149,7 @@ if ( $op eq "add_confirm" ) {
                 $scrubber->scrub( $suggestion->{$suggest} ) );
         }
         $suggestion->{suggesteddate} = dt_from_string;
-        $suggestion->{branchcode} = $input->param('branchcode') || C4::Context->userenv->{"branch"};
+        $suggestion->{branchcode} = $input->param('branchcode') || $borr->{branchcode} || $borrowernumber;
 
         &NewSuggestion($suggestion);
         $patrons_pending_suggestions_count++;
