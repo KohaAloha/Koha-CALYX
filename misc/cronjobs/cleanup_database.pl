@@ -569,6 +569,10 @@ sub GetCorruptedData {
         q|SELECT b.biblionumber FROM biblio b JOIN deletedbiblio db ON b.biblionumber=db.biblionumber|,
         { Slice => {} }
     );
+    my $biblioitems = $dbh->selectall_arrayref(
+        q|SELECT b.biblioitemnumber FROM biblioitems b JOIN deletedbiblioitems db ON b.biblioitemnumber=db.biblioitemnumber|,
+        { Slice => {} }
+    );
     my $items = $dbh->selectall_arrayref(
         q|SELECT i.itemnumber FROM items i JOIN deleteditems di ON i.itemnumber=di.itemnumber|,
         { Slice => {} }
@@ -595,6 +599,11 @@ sub GetCorruptedData {
         (
             @$biblios
             ? { entity => 'biblios', col_name => 'biblionumber', rows => $biblios, tables => [ 'biblio', 'deletedbiblio' ] }
+            : ()
+        ),
+        (
+            @$biblioitems
+            ? { entity => 'biblioitems', col_name => 'biblioitemnumber', rows => $biblioitems, tables => ['biblioitems', 'deletedbiblioitems'] }
             : ()
         ),
         (
