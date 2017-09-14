@@ -45,9 +45,9 @@ use List::MoreUtils qw/ any /;
 use Encode qw( encode is_utf8);
 use C4::Auth_with_shibboleth;
 
-#use Smart::Comments '#####';
+use Smart::Comments '###';
 
-#use DDP alias => 'zzz', colored => 0, caller_info => 1;
+use DDP alias => 'zzz', colored => 0, caller_info => 1;
 
 
 # use utf8;
@@ -62,6 +62,10 @@ BEGIN {
     }
 
     $debug     = $ENV{DEBUG};
+    $debug     = 1;
+
+
+
     @ISA       = qw(Exporter);
     @EXPORT    = qw(&checkauth &get_template_and_user &haspermission &get_user_subpermissions);
     @EXPORT_OK = qw(&check_api_auth &get_session &check_cookie_auth &checkpw &checkpw_internal &checkpw_hash
@@ -778,6 +782,9 @@ sub _version_check {
     # there is a DB version, compare it to the code version
     my $kohaversion = Koha::version();
 
+    warn 'zzzz' .  $kohaversion ;
+
+
     # remove the 3 last . to have a Perl number
     $kohaversion =~ s/(.*\..*)\.(.*)\.(.*)/$1$2$3/;
     $debug and print STDERR "kohaversion : $kohaversion\n";
@@ -819,6 +826,9 @@ sub get_header {
     my $q = CGI->new();
     # Prepend HTTP_ as that's how they come through
     my $h_val = $q->http('HTTP_' . $header);
+
+warn $header;
+
     return $h_val;
 }
 
@@ -845,7 +855,9 @@ sub checkauth {
     my $flagsrequired   = shift;
     my $type            = shift;
     my $emailaddress    = shift;
+
     $type = 'opac' unless $type;
+
 
     my $dbh     = C4::Context->dbh;
     my $timeout = _timeout_syspref();
@@ -867,8 +879,29 @@ sub checkauth {
 
     my $session;
 
-    my $trusted_header = C4::Context->config('trusted_header');
-    my $trust_head_val = get_header($trusted_header) if $trusted_header;
+# ---------------------
+    my $c  = C4::Context->config();
+    ### $c 
+
+    my $interface  = C4::Context->interface;
+#    warn  $interface ;
+#    warn  '$type  =' .   $type;
+
+    my $trusted_header ;
+    my $trust_head_val ;
+
+
+    if ($type eq  'opac' ) {
+        $trusted_header = C4::Context->config('trusted_header');
+        $trust_head_val = get_header($trusted_header) if $trusted_header;
+    }
+
+    ### $trusted_header
+    ### $trust_head_val
+
+    warn $trusted_header;
+    warn $trust_head_val;
+# ---------------------
 
     # Basic authentication is incompatible with the use of Shibboleth,
     # as Shibboleth may return REMOTE_USER as a Shibboleth attribute,
