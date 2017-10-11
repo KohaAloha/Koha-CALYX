@@ -34,6 +34,7 @@ BEGIN {
     eval { require "$FindBin::Bin/../kohalib.pl" };
 }
 
+use C4::Biblio;
 use C4::Context;
 use C4::Search;
 use C4::Search::History;
@@ -539,6 +540,10 @@ sub FixCorruptedData {
                 $dbh->do( q|UPDATE tmp_holdsqueue SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
                 $dbh->do( q|UPDATE suggestions SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
                 $dbh->do( q|UPDATE linktracker SET biblionumber = ? WHERE biblionumber = ?|, undef, $max, $old_id );
+                # Delete old record from index
+                C4::Biblio::ModZebra( $old_id, 'recordDelete',  'biblioserver' );
+                # Add/Update new record
+                C4::Biblio::ModZebra( $max,    'specialUpdate', 'biblioserver' );
             } elsif ( $table eq 'items' ) {
                 $dbh->do( q|UPDATE collections_tracking SET itemnumber = ? WHERE itemnumber = ?|, undef, $max, $old_id );
                 $dbh->do( q|UPDATE import_items SET itemnumber = ? WHERE itemnumber = ?|, undef, $max, $old_id );
