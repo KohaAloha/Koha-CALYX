@@ -801,6 +801,27 @@ sub _session_log {
     close $fh;
 }
 
+=head2 get_header
+
+    my $header_val = get_header($header);
+
+This retrieves the HTTP header from the CGI request. Note that this seems to
+not work with regular CGI (those values end up in the environment anyway), but
+it does work with plack.
+
+If there is no matching header, C<undef> is returned.
+
+=cut
+
+sub get_header {
+    my ($header) = @_;
+
+    my $q = CGI->new();
+    # Prepend HTTP_ as that's how they come through
+    my $h_val = $q->http('HTTP_' . $header);
+    return $h_val;
+}
+
 sub _timeout_syspref {
     my $timeout = C4::Context->preference('timeout') || 600;
 
@@ -846,6 +867,9 @@ sub checkauth {
 
     my $session;
 
+    my $trusted_header = C4::Context->config('trusted_header');
+    my $trust_head_val = get_header($trusted_header) if $trusted_header;
+
     # Basic authentication is incompatible with the use of Shibboleth,
     # as Shibboleth may return REMOTE_USER as a Shibboleth attribute,
     # and it may not be the attribute we want to use to match the koha login.
@@ -858,6 +882,24 @@ sub checkauth {
     if ( !$shib and defined( $ENV{'REMOTE_USER'} ) and $ENV{'REMOTE_USER'} ne '' and $userid = $ENV{'REMOTE_USER'} ) {
 
         # Using Basic Authentication, no cookies required
+        $cookie = $query->cookie(
+            -name     => 'CGISESSID',
+            -value    => '',
+            -expires  => '',
+            -HttpOnly => 1,
+        );
+        $loggedin = 1;
+    }
+    elsif ($userid = $trust_head_val) {
+
+        # This uses something like
+        # <trusted_header>X_REMOTE_USER</trusted_header>
+        # in koha-conf.xml, and checks that header on the incoming request.
+        # If it is there and contains a user ID, we believe it and log the
+        # user in with that. This is intended for things like plack behind a
+        # reverse proxy that does auth, and puts the user ID into a header.
+        #
+        # Basically, we treat it just like basic auth.
         $cookie = $query->cookie(
             -name     => 'CGISESSID',
             -value    => '',
@@ -1003,7 +1045,9 @@ sub checkauth {
             || $q_userid
             || ( $shib && $shib_login )
             || $pki_field ne 'None'
-            || $emailaddress )
+            || $emailaddress
+            || $trusted_header )
+
         {
             my $password    = $query->param('password');
             my $shibSuccess = 0;
