@@ -114,7 +114,7 @@ if ( $op eq 'else' ) {
     }
 }
 
-my ( $borr ) = GetMemberDetails( $borrowernumber ) if  $borrowernumber;
+my ( $borr ) = GetMember( $borrowernumber ) if  $borrowernumber;
 
 my $patrons_pending_suggestions_count = 0;
 if ( $borrowernumber && C4::Context->preference("MaxOpenSuggestions") ne '' ) {

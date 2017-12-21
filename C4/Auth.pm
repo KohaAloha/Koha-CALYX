@@ -45,9 +45,8 @@ use List::MoreUtils qw/ any /;
 use Encode qw( encode is_utf8);
 use C4::Auth_with_shibboleth;
 
-use Smart::Comments '###';
-
-use DDP alias => 'zzz', colored => 0, caller_info => 1;
+#use Smart::Comments '###';
+#use DDP alias => 'zzz', colored => 0, caller_info => 1;
 
 
 # use utf8;
