@@ -2112,6 +2112,11 @@ sub searchResults {
 
 			my $prefix = $item->{$hbranch} . '--' . $item->{location} . $item->{itype} . $item->{itemcallnumber};
 # For each grouping of items (onloan, available, unavailable), we build a key to store relevant info about that item
+
+
+            my $userenv = C4::Context->userenv;
+
+
             if ( $item->{onloan}
                 and $logged_in_user
                 and !( $patron_category_hide_lost_items and $item->{itemlost} ) )
@@ -2140,7 +2145,14 @@ sub searchResults {
          # items not on loan, but still unavailable ( lost, withdrawn, damaged )
             else {
 
-                $item->{notforloan}=1 if !$item->{notforloan}  && $itemtypes{ C4::Context->preference("item-level_itypes")? $item->{itype}: $oldbiblio->{itemtype} }->{notforloan};
+                # skip if user logged in and has hidelostitems set, and item is lost
+                next if  ( $userenv
+                        && $userenv->{number}
+                        && Koha::Patrons->find($userenv->{number})->category->hidelostitems
+                        && $item->{itemlost} 
+                );
+
+                $item->{notforloan} = 1 if !$item->{notforloan}  && $itemtypes{ C4::Context->preference("item-level_itypes") ? $item->{itype} : $oldbiblio->{itemtype} }->{notforloan};
 
                 # item is on order
                 if ( $item->{notforloan} < 0 ) {
