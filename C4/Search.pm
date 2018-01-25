@@ -2146,11 +2146,15 @@ sub searchResults {
             else {
 
                 # skip if user logged in and has hidelostitems set, and item is lost
-                next if  ( $userenv
+                if  ( $userenv
                         && $userenv->{number}
                         && Koha::Patrons->find($userenv->{number})->category->hidelostitems
-                        && $item->{itemlost} 
-                );
+                        && $item->{itemlost}  ) 
+                    { 
+                    warn 'xxxxzzzzzzzzzzzzzz';
+
+                    next;
+                }
 
                 $item->{notforloan} = 1 if !$item->{notforloan}  && $itemtypes{ C4::Context->preference("item-level_itypes") ? $item->{itype} : $oldbiblio->{itemtype} }->{notforloan};
 
