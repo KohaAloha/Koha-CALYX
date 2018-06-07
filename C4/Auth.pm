@@ -781,9 +781,6 @@ sub _version_check {
     # there is a DB version, compare it to the code version
     my $kohaversion = Koha::version();
 
-    warn 'zzzz' .  $kohaversion ;
-
-
     # remove the 3 last . to have a Perl number
     $kohaversion =~ s/(.*\..*)\.(.*)\.(.*)/$1$2$3/;
     $debug and print STDERR "kohaversion : $kohaversion\n";
@@ -880,20 +877,18 @@ sub checkauth {
 
 # ---------------------
     my $c  = C4::Context->config();
-    ### $c 
+    ### $c
 
     my $interface  = C4::Context->interface;
 #    warn  $interface ;
 #    warn  '$type  =' .   $type;
-
     my $trusted_header ;
     my $trust_head_val ;
 
-
-    if ($type eq  'opac' ) {
-        $trusted_header = C4::Context->config('trusted_header');
-        $trust_head_val = get_header($trusted_header) if $trusted_header;
-    }
+if ($type eq  'opac' ) {
+    $trusted_header = C4::Context->config('trusted_header');
+    $trust_head_val = get_header($trusted_header) if $trusted_header;
+}
 
     ### $trusted_header
     ### $trust_head_val
