@@ -66,7 +66,7 @@ function submitBackgroundJob(f) {
             success: function(json) {
                 jobID = json.jobID;
                 inBackgroundJobProgressTimer = false;
-                backgroundJobProgressTimer = setInterval("updateJobProgress()", 500);
+                backgroundJobProgressTimer = setInterval("updateJobProgress()", 5000);
             },
             error: function(xml, textStatus) {
                 alert('Failed to submit form: ' + textStatus);
