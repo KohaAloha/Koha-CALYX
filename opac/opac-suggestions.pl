@@ -114,7 +114,11 @@ if ( $op eq 'else' ) {
     }
 }
 
-my ( $borr ) = GetMember(  'borrowernumber' => $borrowernumber ) if  $borrowernumber;
+my $bc_mellon;
+if ($borrowernumber) {
+        my $patron_mellon  = Koha::Patrons->find( $borrowernumber );
+        $bc_mellon = $patron_mellon->branchcode;
+}
 
 my $patrons_pending_suggestions_count = 0;
 if ( $borrowernumber && C4::Context->preference("MaxOpenSuggestions") ne '' ) {
@@ -149,7 +153,7 @@ if ( $op eq "add_confirm" ) {
                 $scrubber->scrub( $suggestion->{$suggest} ) );
         }
         $suggestion->{suggesteddate} = dt_from_string;
-        $suggestion->{branchcode} = $input->param('branchcode') || $borr->{branchcode} || $borrowernumber;
+        $suggestion->{branchcode} = $input->param('branchcode') || $bc_mellon || C4::Context->userenv->{"branch"};
 
         &NewSuggestion($suggestion);
         $patrons_pending_suggestions_count++;
