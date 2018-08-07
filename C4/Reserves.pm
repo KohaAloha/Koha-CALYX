@@ -1193,6 +1193,9 @@ sub IsAvailableForItemLevelRequest {
             my $circ_control_branch = C4::Circulation::_GetCircControlBranch( $i->unblessed(), $borrower );
             my $branchitemrule = C4::Circulation::GetBranchItemRule( $circ_control_branch, $i->itype );
 
+            # skip if itype is missing
+            next unless  $i->itype;
+
             $any_available = 1
               unless $i->itemlost
               || $i->notforloan > 0
