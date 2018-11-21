@@ -42,7 +42,6 @@ my $op = $query->param('op') || '';
 my $dbh = C4::Context->dbh;
 my $sub_length;
 
-
 # Permission needed if it is a modification : edit_subscription
 # Permission needed otherwise (nothing or dup) : create_subscription
 my $permission =
@@ -57,16 +56,16 @@ my ($template, $loggedinuser, $cookie)
 				debug => 1,
 				});
 
-
-
 my $sub_on;
 
 my $subs;
 our $firstissuedate;
 
+my $subscriptionid ;
 if ($op eq 'modify' || $op eq 'dup' || $op eq 'modsubscription') {
 
-    my $subscriptionid = $query->param('subscriptionid');
+    $subscriptionid = $query->param('subscriptionid'); #DML
+
     $subs = GetSubscription($subscriptionid);
 
     output_and_exit( $query, $cookie, $template, 'unknown_subscription')
@@ -229,6 +228,8 @@ if ($op eq 'addsubscription') {
             description => $_->{language_description} || $_->{language}
         }
     } @{ C4::Languages::getAllLanguages() } ];
+
+    $template->param( 'subscriptionid' =>  $subscriptionid )  if $subscriptionid; # add for DML
 
     $template->param( locales => $languages );
 
