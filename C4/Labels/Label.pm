@@ -378,12 +378,13 @@ sub draw_label_text {
         my @label_lines;
         # Fields which hold call number data  FIXME: ( 060? 090? 092? 099? )
         my @callnumber_list = qw(itemcallnumber 050a 050b 082a 952o 995k);
-        if ((grep {$field->{'code'} =~ m/$_/} @callnumber_list) and ($self->{'printing_type'} eq 'BIB') and ($self->{'callnum_split'})) { # If the field contains the call number, we do some sp
+
+        if ((grep {$field->{'code'} =~ m/$_/} @callnumber_list) and ($self->{'printing_type'} =~  /BIB/ ) and ($self->{'callnum_split'})) { # If the field contains the call number, we do some sp
             if ($split_routine eq 'LCC' || $split_routine eq 'nlm') { # NLM and LCC should be split the same way
                 @label_lines = C4::ClassSplitRoutine::LCC::split_callnumber($field_data);
                 @label_lines = C4::ClassSplitRoutine::Generic::split_callnumber($field_data) unless @label_lines; # If it was not a true lccn, try it as a custom call number
                 push (@label_lines, $field_data) unless @label_lines;         # If it was not that, send it on unsplit
-            } elsif ($split_routine eq 'Dewey') {
+            } elsif ($split_routine eq 'Dewey' ||  $split_routine eq 'clutscny' || $split_routine eq 'z' ) {
                 @label_lines = C4::ClassSplitRoutine::Dewey::split_callnumber($field_data);
                 @label_lines = C4::ClassSplitRoutine::Generic::split_callnumber($field_data) unless @label_lines;
                 push (@label_lines, $field_data) unless @label_lines;
