@@ -60,13 +60,13 @@ my ($template, $loggedinuser, $cookie)
                 debug => 1,
                 });
 
-
 my $subs = GetSubscription($subscriptionid);
 
 output_and_exit( $query, $cookie, $template, 'unknown_subscription')
     unless $subs;
 
 $subs->{enddate} ||= GetExpirationDate($subscriptionid);
+
 
 my ($totalissues,@serialslist) = GetSerials($subscriptionid);
 $totalissues-- if $totalissues; # the -1 is to have 0 if this is a new subscription (only 1 issue)
@@ -145,6 +145,8 @@ while ( my $o = $orders->next ) {
     push @{$orders_grouped->{$o->parent_ordernumber}->{orders}}, $o;
 }
 
+my $bibnum =  $subs->{'bibnum'} if  $subs->{'bibnum'}; # mtj`
+
 $template->param(
     subscriptionid => $subscriptionid,
     serialslist => \@serialslist,
@@ -163,6 +165,13 @@ $template->param(
     default_bib_view => $default_bib_view,
     orders_grouped => $orders_grouped,
     (uc(C4::Context->preference("marcflavour"))) => 1,
+<<<<<<< HEAD
+=======
+    show_acquisition_details => defined $tmpl_infos->{ordered_exists} || defined $tmpl_infos->{spent_exists} ? 1 : 0,
+    basketno => $order->{basketno},
+    biblionumber => $bibnum
+    %$tmpl_infos,
+>>>>>>> cbd4475... add bibnum
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;
