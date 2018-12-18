@@ -106,8 +106,13 @@ start_plack()
         STARMAN="/usr/bin/perl -d ${STARMAN}"
     fi
 
+     local apacheuser=${instancename}-koha
+     if [ "$instancename" ==  "slgs" ]; then
+        apacheuser="www-data"
+     fi
+
     STARMANOPTS="-M FindBin ${max_requests_and_workers} \
-                 --user=${instance_user} --group ${instancename}-koha \
+                 --user=${apacheuser} --group ${apacheuser} \
                  --pid ${PIDFILE} ${daemonize} ${logging} \
                  -E ${environment} --socket ${PLACKSOCKET} ${PSGIFILE}"
 
