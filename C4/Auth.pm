@@ -556,7 +556,7 @@ sub get_template_and_user {
         }
 
         my @search_groups = Koha::Library::Groups->get_search_groups({ interface => 'opac' });
-        my $library_categories = Koha::LibraryCategories->search({categorytype => 'searchdomain', show_in_pulldown => 1}, { order_by => ['categorytype', 'categorycode']});
+#        my $library_categories = Koha::LibraryCategories->search({categorytype => 'searchdomain', show_in_pulldown => 1}, { order_by => ['categorytype', 'categorycode']});
 
         $template->param(
             AnonSuggestions                       => "" . C4::Context->preference("AnonSuggestions"),
