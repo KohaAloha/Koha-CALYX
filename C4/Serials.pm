@@ -1126,7 +1126,7 @@ sub ModSerialStatus {
 
             # in case serial has been previously marked as missing
             if (grep /$status/, (EXPECTED, ARRIVED, LATE, CLAIMED)) {
-                $missinglist=~ s/(^|;)\s*$serialseq(?=;|$)//g;
+                $missinglist =~ s/(^|;)\s*$serialseq(?=;|$)//g;
             }
 
             $missinglist .= "; $serialseq"
@@ -1567,6 +1567,9 @@ sub NewIssue {
     my $serialid = $serial->id();
 
     my $subscription_history = Koha::Subscription::Histories->find($subscriptionid);
+
+# KA - fix more missing history
+if  ( $subscription_history )  {
     my $missinglist = $subscription_history->missinglist();
     my $recievedlist = $subscription_history->recievedlist();
 
@@ -1586,6 +1589,8 @@ sub NewIssue {
     $subscription_history->recievedlist($recievedlist);
     $subscription_history->missinglist($missinglist);
     $subscription_history->store();
+}
+
 
     return $serialid;
 }
