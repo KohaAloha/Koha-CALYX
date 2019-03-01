@@ -27,6 +27,8 @@ use Koha::Linktracker;
 use CGI qw ( -utf8 );
 use List::MoreUtils qw(any);
 
+#warn '----------------------------------------------------';
+
 my $cgi = new CGI;
 my $uri = $cgi->param('uri') || '';
 my $biblionumber = $cgi->param('biblionumber') || 0;
@@ -84,3 +86,42 @@ if ($uri && ($biblionumber || $itemnumber) ) {
 
 print $cgi->redirect("/cgi-bin/koha/errors/404.pl");    # escape early
 exit;
+
+use URI;
+use LWP::UserAgent;
+
+sub upgrade_uri {
+    my $uri = shift;
+
+    my $ua = LWP::UserAgent->new;
+#    $ua->agent("MyApp/0.1 ");
+    my $u = URI->new($uri);
+
+    my $str;
+    $str = $u->as_string;
+
+    # force to https
+    unless ( $u->secure  ) {
+        $str =~ s/^(http:)/https:/;
+
+        my $ua2 = LWP::UserAgent->new;
+#        $ua2->agent("MyApp/0.1 ");
+        my $u2 = URI->new($str);
+
+        $u2->port('');
+        my $u3 = $u2->canonical;
+
+        $str = $u3->as_string;
+    }
+
+    my $req = HTTP::Request->new( POST => $str );
+    my $res = $ua->request($req);
+
+    if ( $res->is_success ) {
+        return $str;
+    }
+    else {
+        return $uri;
+    }
+}
+
