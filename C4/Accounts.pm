@@ -100,9 +100,17 @@ sub chargelostitem{
     my ($borrowernumber, $itemnumber, $amount, $description) = @_;
     my $itype = Koha::ItemTypes->find({ itemtype => Koha::Items->find($itemnumber)->effective_itemtype() });
     my $replacementprice = $amount;
-    my $defaultreplacecost = $itype->defaultreplacecost;
-    my $processfee = $itype->processfee;
+
+    my $defaultreplacecost ;
+    my $processfee ;
+
+    if ( $itype ) {
+     $defaultreplacecost = $itype->defaultreplacecost ;
+     $processfee = $itype->processfee  ;
+    }
+
     my $usedefaultreplacementcost = C4::Context->preference("useDefaultReplacementCost");
+
     my $processingfeenote = C4::Context->preference("ProcessingFeeNote");
     if ($usedefaultreplacementcost && $amount == 0 && $defaultreplacecost){
         $replacementprice = $defaultreplacecost;
