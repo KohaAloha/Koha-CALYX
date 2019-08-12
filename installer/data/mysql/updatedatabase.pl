@@ -17533,7 +17533,7 @@ if ( CheckVersion( $DBversion ) ) {
 
 $DBversion = "18.11.08.000";
 if ( CheckVersion($DBversion) ) {
-        print "Upgrade to $DBversion done (18.11.08 release)\n";
+        print "Upgrade to $DBversion done (18.11.08 CALYX release)\n";
             SetVersion ($DBversion);
  }
 
