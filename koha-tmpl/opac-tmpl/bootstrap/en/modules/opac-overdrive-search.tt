@@ -69,7 +69,9 @@
 [% Asset.js("js/overdrive.js") | $raw %]
 [% Asset.js("lib/jquery/plugins/jquery.rating.js") | $raw %]
 <script>
-var OD_password_required = [% IF Koha.Preference('OverDrivePasswordRequired') %]1[% ELSE %]0[% END %];
+// var OD_password_required = [% IF Koha.Preference('OverDrivePasswordRequired') %]1[% ELSE %]0[% END %];
+var OD_password_required = 0;
+
 var querystring = "[% q |replace( "'", "\'" ) |replace( '\n', '\\n' ) |replace( '\r', '\\r' ) | html %]";
 var results_per_page = [% OPACnumSearchResults | html %];
 
