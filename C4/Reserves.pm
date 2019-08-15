@@ -1196,6 +1196,7 @@ sub IsAvailableForItemLevelRequest {
             # skip if itype is missing
             next unless  $i->itype;
 
+eval        {
             $any_available = 1
               unless $i->itemlost
               || $i->notforloan > 0
@@ -1206,7 +1207,8 @@ sub IsAvailableForItemLevelRequest {
                 && !C4::Context->preference('AllowHoldsOnDamagedItems') )
               || Koha::ItemTypes->find( $i->effective_itemtype() )->notforloan
               || $branchitemrule->{holdallowed} == 1 && $borrower->{branchcode} ne $i->homebranch;
-        }
+            }
+        } # foreach
 
         return $any_available ? 0 : 1;
     } else { # on_shelf_holds == 0 "If any unavailable" (the description is rather cryptic and could still be improved)

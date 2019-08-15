@@ -2151,8 +2151,6 @@ sub searchResults {
                         && Koha::Patrons->find($userenv->{number})->category->hidelostitems
                         && $item->{itemlost}  ) 
                     { 
-                    warn 'xxxxzzzzzzzzzzzzzz';
-
                     next;
                 }
 

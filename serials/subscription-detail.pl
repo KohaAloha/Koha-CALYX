@@ -165,13 +165,7 @@ $template->param(
     default_bib_view => $default_bib_view,
     orders_grouped => $orders_grouped,
     (uc(C4::Context->preference("marcflavour"))) => 1,
-<<<<<<< HEAD
-=======
-    show_acquisition_details => defined $tmpl_infos->{ordered_exists} || defined $tmpl_infos->{spent_exists} ? 1 : 0,
-    basketno => $order->{basketno},
     biblionumber => $bibnum
-    %$tmpl_infos,
->>>>>>> cbd4475... add bibnum
 );
 
 output_html_with_http_headers $query, $cookie, $template->output;

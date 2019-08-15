@@ -114,7 +114,7 @@ sub search_method {
 sub checkpw_ldap {
     my ($dbh, $userid, $password) = @_;
     my @hosts = split(',', $prefhost);
-    my $db = Net::LDAP->new(\@hosts);
+    my $db = Net::LDAP->new(\@hosts, timeout => 10);
     unless ( $db ) {
         warn "LDAP connexion failed";
         return 0;

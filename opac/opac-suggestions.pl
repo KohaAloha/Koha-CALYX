@@ -114,6 +114,7 @@ if ( $op eq 'else' ) {
     }
 }
 
+my ( $borr ) = GetMember(  'borrowernumber' => $borrowernumber ) if  $borrowernumber;
 my $bc_mellon;
 if ($borrowernumber) {
         my $patron_mellon  = Koha::Patrons->find( $borrowernumber );
