@@ -108,12 +108,6 @@ if ( $patron ) {
         );
     }
 }
-# -------------------------------------------
-if (C4::Context->preference('OpacCarousel') ) {
-    our $new_bibs_loop   = GetNewBiblios($user_branch );
-    $template->param(   new_bibs_loop => $new_bibs_loop ) ;
-}
-# -------------------------------------------
 
 $template->param(
     koha_news           => $all_koha_news,
