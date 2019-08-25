@@ -360,6 +360,7 @@
                 <th class="itemcallnumber">Call number</th>
                 <th>Status</th>
                 <th class="datelastseen">Last seen</th>
+                <th class="title-string">Date accessioned</th>
                 <th class="bc">Barcode</th>
                 [% IF ( volinfo ) %]<th>Publication details</th>[% END %]
                 [% IF ( itemdata_uri ) %]<th>url</th>[% END %]
