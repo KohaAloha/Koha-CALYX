@@ -357,19 +357,19 @@
                 <th>Current location</th>
                 <th>Home library</th>
                 [% IF ( itemdata_ccode ) %]<th>Collection</th>[% END %]
-                <th>Call number</th>
+                <th class="itemcallnumber">Call number</th>
                 [% IF ( volinfo ) %]<th>Serial enumeration / chronology</th>[% END %]
                 <th>Status</th>
-                <th class="title-string">Last seen</th>
+                <th class="title-string datelastseen">Last seen</th>
                 <th class="title-string">Date accessioned</th>
-                <th>Barcode</th>
+                <th class="bc">Barcode</th>
                 [% IF ( itemdata_uri ) %]<th>URL</th>[% END %]
                 [% IF ( itemdata_copynumber ) %]<th>Copy number</th>[% END %]
                 [% IF ( itemdata_stocknumber ) %]<th>Inventory number</th>[% END %]
                 [% IF materials %]<th>Materials specified</th>[% END %]
                 [% IF ( itemdata_itemnotes ) %]<th>Public notes</th>[% END %]
                 [% IF ( itemdata_nonpublicnotes ) %]<th>Non-public notes</th>[% END %]
-                [% IF ( SpineLabelShowPrintOnBibDetails ) %]<th>Spine labelxx</th>[% END %]
+                [% IF ( SpineLabelShowPrintOnBibDetails ) %]<th>Spine label</th>[% END %]
                 [% IF ( hostrecords ) %]<th>Host records</th>[% END %]
                 [% IF ( analyze ) %]<th>Used in</th><th></th>[% END %]
                 [% IF ( ShowCourseReserves ) %]<th>Course Reserves</th>[% END %]
