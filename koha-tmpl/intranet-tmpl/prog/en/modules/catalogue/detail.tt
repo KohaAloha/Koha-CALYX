@@ -357,19 +357,19 @@
                 <th>Current location</th>
                 <th>Home library</th>
                 [% IF ( itemdata_ccode ) %]<th>Collection</th>[% END %]
-                <th class="itemcallnumber">Call number</th>
+                <th>Call number</th>
+                [% IF ( volinfo ) %]<th>Serial enumeration / chronology</th>[% END %]
                 <th>Status</th>
-                <th class="datelastseen">Last seen</th>
+                <th class="title-string">Last seen</th>
                 <th class="title-string">Date accessioned</th>
-                <th class="bc">Barcode</th>
-                [% IF ( volinfo ) %]<th>Publication details</th>[% END %]
-                [% IF ( itemdata_uri ) %]<th>url</th>[% END %]
+                <th>Barcode</th>
+                [% IF ( itemdata_uri ) %]<th>URL</th>[% END %]
                 [% IF ( itemdata_copynumber ) %]<th>Copy number</th>[% END %]
                 [% IF ( itemdata_stocknumber ) %]<th>Inventory number</th>[% END %]
                 [% IF materials %]<th>Materials specified</th>[% END %]
                 [% IF ( itemdata_itemnotes ) %]<th>Public notes</th>[% END %]
                 [% IF ( itemdata_nonpublicnotes ) %]<th>Non-public notes</th>[% END %]
-                [% IF ( SpineLabelShowPrintOnBibDetails ) %]<th>Spine label</th>[% END %]
+                [% IF ( SpineLabelShowPrintOnBibDetails ) %]<th>Spine labelxx</th>[% END %]
                 [% IF ( hostrecords ) %]<th>Host records</th>[% END %]
                 [% IF ( analyze ) %]<th>Used in</th><th></th>[% END %]
                 [% IF ( ShowCourseReserves ) %]<th>Course Reserves</th>[% END %]
@@ -505,27 +505,8 @@
 
                     </td>
                     <td class="datelastseen"><span title="[% item.datelastseen | html %]">[% item.datelastseen | $KohaDates %]</span></td>
-                    <td class="bc"><a href="/cgi-bin/koha/catalogue/moredetail.pl?type=[% item.type | uri %]&amp;itemnumber=[% item.itemnumber | uri %]&amp;biblionumber=[% item.biblionumber | uri %]&amp;bi=[% item.biblioitemnumber | uri %]#item[% item.itemnumber | uri %]">[% item.barcode | html %]</a></td>
-                    [% IF ( volinfo ) %]
-                        <td class="enumchron">
-                            [% IF ( itemdata_enumchron ) %]
-                                [% IF item.enumchron && item.serialseq %]
-                                    <span class="enum">[% item.enumchron %]</span>
-                                    [% IF ( item.serialseq && item.enumchron!=item.serialseq ) %]
-                                        <span class="sep"> -- </span>
-                                        <span class="serialseq">[% item.serialseq | html %]</span>
-                                    [% END %]
-                                [% ELSIF item.enumchron %]
-                                    <span class="enum">[% item.enumchron | html %]</span>
-                                [% ELSIF item.serialseq %]
-                                    <span class="serialseq">[% item.serialseq | html %]</span>
-                                [% END %]
-                                [% IF ( item.publisheddate ) %]
-                                    <span class="pubdate">([% item.publisheddate | $KohaDates %])</span>
-                                [% END %]
-                            [% END %]
-                        </td>
-                    [% END %]
+                    <td class="dateaccessioned"><span title="[% item.dateaccessioned | html %]">[% item.dateaccessioned | $KohaDates %]</span></td>
+                    <td><a href="/cgi-bin/koha/catalogue/moredetail.pl?type=[% item.type | uri %]&amp;itemnumber=[% item.itemnumber | uri %]&amp;biblionumber=[% item.biblionumber | uri %]&amp;bi=[% item.biblioitemnumber | uri %]#item[% item.itemnumber | uri %]">[% item.barcode | html %]</a></td>
                     [% IF ( itemdata_uri ) %]
                         <td class="uri"><a href="[% item.uri | url %]">[% item.uri | html %]</a></td>
                     [% END %]
