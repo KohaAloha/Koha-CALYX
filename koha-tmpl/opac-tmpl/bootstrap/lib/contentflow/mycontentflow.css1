@@ -1,0 +1,3 @@
+.ContentFlow .globalCaption {
+    color: black;
+}
